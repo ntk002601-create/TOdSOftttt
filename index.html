@@ -1,0 +1,532 @@
+# NTK Popopo Inventory System (HTML)
+
+```html
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NTK Popopo - ระบบเช็คสต็อก</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Noto Sans Thai', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #0f0f0f, #1b1b1b, #2c0000);
+      color: white;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1400px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #8b0000, #d40000, #111);
+      border: 2px solid gold;
+      border-radius: 24px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    .logo {
+      width: 110px;
+      height: 110px;
+      margin: auto;
+      border-radius: 50%;
+      background: gold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #111;
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 15px;
+      border: 4px solid white;
+    }
+
+    .header h1 {
+      font-size: 42px;
+      font-weight: 900;
+      color: gold;
+    }
+
+    .header p {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #fff;
+    }
+
+    .language-box {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .language-box button {
+      background: black;
+      color: gold;
+      border: 1px solid gold;
+      padding: 10px 18px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 18px;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,215,0,0.3);
+      border-radius: 20px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+    }
+
+    .card h3 {
+      color: gold;
+      margin-bottom: 10px;
+    }
+
+    .card .value {
+      font-size: 32px;
+      font-weight: 900;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .controls input,
+    .controls select,
+    .controls button {
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      font-size: 15px;
+    }
+
+    .controls input,
+    .controls select {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .controls button {
+      background: gold;
+      color: black;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .controls button:hover {
+      opacity: 0.9;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.05);
+    }
+
+    th {
+      background: linear-gradient(135deg, #8b0000, #111);
+      color: gold;
+      padding: 16px;
+      text-align: left;
+    }
+
+    td {
+      padding: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    tr:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .low-stock {
+      background: rgba(255,0,0,0.2);
+      color: #ff8080;
+      font-weight: bold;
+      padding: 6px 10px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    .good-stock {
+      background: rgba(0,255,100,0.15);
+      color: #77ffb3;
+      font-weight: bold;
+      padding: 6px 10px;
+      border-radius: 10px;
+      display: inline-block;
+    }
+
+    .summary-grid {
+      margin-top: 25px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    .summary-item {
+      background: linear-gradient(135deg, #111, #330000);
+      border: 1px solid gold;
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .summary-item h4 {
+      color: gold;
+      margin-bottom: 10px;
+    }
+
+    .footer {
+      margin-top: 30px;
+      text-align: center;
+      color: #bbb;
+      padding-bottom: 30px;
+    }
+
+    @media(max-width: 768px){
+      .header h1 {
+        font-size: 28px;
+      }
+
+      table {
+        font-size: 13px;
+      }
+
+      .controls {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="logo">NTK</div>
+    <h1>ร้าน NTK Popopo</h1>
+    <p>ร้านขายของชำ ขายปลีก-ส่ง มีสินค้าครบทุกอย่าง</p>
+
+    <div class="language-box">
+      <button>ภาษาไทย</button>
+      <button>မြန်မာ</button>
+    </div>
+  </div>
+
+  <div class="dashboard">
+    <div class="card">
+      <h3>จำนวนสินค้า</h3>
+      <div class="value" id="totalProducts">0</div>
+    </div>
+
+    <div class="card">
+      <h3>หมวดหมู่สินค้า</h3>
+      <div class="value">8</div>
+    </div>
+
+    <div class="card">
+      <h3>สินค้าใกล้หมด</h3>
+      <div class="value" id="lowStockCount">0</div>
+    </div>
+
+    <div class="card">
+      <h3>แจ้งเตือนสต็อกต่ำ</h3>
+      <div class="value">ACTIVE</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <select id="categoryFilter">
+      <option value="all">เลือกหมวดหมู่ทั้งหมด</option>
+    </select>
+
+    <input type="text" id="searchInput" placeholder="ค้นหาสินค้า...">
+
+    <button onclick="showLowStock()">สรุปสินค้าใกล้หมด</button>
+    <button onclick="exportExcel()">Export Excel</button>
+    <button onclick="exportPDF()">Export PDF</button>
+  </div>
+
+  <div style="overflow-x:auto;">
+    <table id="inventoryTable">
+      <thead>
+        <tr>
+          <th>หมวดหมู่</th>
+          <th>สินค้า</th>
+          <th>จำนวน</th>
+          <th>หน่วย</th>
+          <th>หน่วยหลัง Convert</th>
+          <th>สถานะ</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="summary-grid" id="summaryGrid"></div>
+
+  <div class="footer">
+    ระบบเช็คสต็อกสินค้า ร้าน NTK Popopo
+  </div>
+
+</div>
+
+<script>
+
+const GOOGLE_SHEET_WEBAPP_URL = "วางลิงก์ Google Apps Script Web App ตรงนี้";
+const SHEET_POLL_MS = 10000;
+
+let inventory = [
+  { category: 'เครื่องดื่ม', name: 'น้ำเปล่า', qty: 10, unit: 'แพ็ค' },
+  { category: 'เครื่องดื่ม', name: 'โค้ก', qty: 2, unit: 'ลัง' },
+  { category: 'เครื่องดื่ม', name: 'เป๊ปซี่', qty: 4, unit: 'ลัง' },
+  { category: 'เครื่องดื่ม', name: 'โซดา', qty: 8, unit: 'แพ็ค' },
+  { category: 'เครื่องดื่ม', name: 'กาแฟกระป๋อง', qty: 6, unit: 'แพ็ค' },
+
+  { category: 'ขนม', name: 'มันฝรั่งทอด', qty: 20, unit: 'ถุง' },
+  { category: 'ขนม', name: 'ขนมปัง', qty: 15, unit: 'แพ็ค' },
+  { category: 'ขนม', name: 'เวเฟอร์', qty: 10, unit: 'ห่อ' },
+  { category: 'ขนม', name: 'ลูกอม', qty: 7, unit: 'ถุง' },
+
+  { category: 'ของใช้ในบ้าน', name: 'ทิชชู่', qty: 3, unit: 'ลัง' },
+  { category: 'ของใช้ในบ้าน', name: 'น้ำยาล้างจาน', qty: 9, unit: 'ขวด' },
+  { category: 'ของใช้ในบ้าน', name: 'ผงซักฟอก', qty: 4, unit: 'ถุง' },
+  { category: 'ของใช้ในบ้าน', name: 'ไม้กวาด', qty: 12, unit: 'อัน' },
+
+  { category: 'อาหารแห้ง', name: 'ข้าวสาร', qty: 5, unit: 'กระสอบ' },
+  { category: 'อาหารแห้ง', name: 'มาม่า', qty: 10, unit: 'ลัง' },
+  { category: 'อาหารแห้ง', name: 'ปลากระป๋อง', qty: 8, unit: 'แพ็ค' },
+  { category: 'อาหารแห้ง', name: 'น้ำตาล', qty: 2, unit: 'กระสอบ' },
+
+  { category: 'เครื่องปรุง', name: 'น้ำปลา', qty: 10, unit: 'ขวด' },
+  { category: 'เครื่องปรุง', name: 'ซีอิ๊ว', qty: 11, unit: 'ขวด' },
+  { category: 'เครื่องปรุง', name: 'ซอสหอยนางรม', qty: 6, unit: 'ขวด' },
+  { category: 'เครื่องปรุง', name: 'ผงชูรส', qty: 4, unit: 'ถุง' },
+
+  { category: 'ของแช่แข็ง', name: 'ไก่แช่แข็ง', qty: 50, unit: 'กิโลกรัม' },
+  { category: 'ของแช่แข็ง', name: 'หมูแช่แข็ง', qty: 40, unit: 'กิโลกรัม' },
+  { category: 'ของแช่แข็ง', name: 'ลูกชิ้น', qty: 8, unit: 'ถุง' },
+  { category: 'ของแช่แข็ง', name: 'ไส้กรอก', qty: 5, unit: 'แพ็ค' },
+
+  { category: 'สุราและเบียร์', name: 'เบียร์ช้าง', qty: 3, unit: 'ลัง' },
+  { category: 'สุราและเบียร์', name: 'เบียร์ลีโอ', qty: 2, unit: 'ลัง' },
+  { category: 'สุราและเบียร์', name: 'เบียร์สิงห์', qty: 1, unit: 'ลัง' },
+  { category: 'สุราและเบียร์', name: 'เหล้าขาว', qty: 9, unit: 'ขวด' },
+  { category: 'สุราและเบียร์', name: 'วิสกี้', qty: 7, unit: 'ขวด' },
+
+  { category: 'ของใช้ส่วนตัว', name: 'สบู่', qty: 15, unit: 'ก้อน' },
+  { category: 'ของใช้ส่วนตัว', name: 'ยาสีฟัน', qty: 9, unit: 'หลอด' },
+  { category: 'ของใช้ส่วนตัว', name: 'แชมพู', qty: 8, unit: 'ขวด' },
+  { category: 'ของใช้ส่วนตัว', name: 'แปรงสีฟัน', qty: 20, unit: 'ด้าม' }
+];
+
+const tbody = document.querySelector('#inventoryTable tbody');
+const categoryFilter = document.getElementById('categoryFilter');
+const searchInput = document.getElementById('searchInput');
+const summaryGrid = document.getElementById('summaryGrid');
+
+function convertUnit(item) {
+  if(item.unit === 'ลัง') {
+    return `${item.qty * 24} ขวด`;
+  }
+
+  if(item.unit === 'แพ็ค') {
+    return `${item.qty * 12} ชิ้น`;
+  }
+
+  if(item.unit === 'กระสอบ') {
+    return `${item.qty * 50} กิโลกรัม`;
+  }
+
+  return `${item.qty} ${item.unit}`;
+}
+
+function renderTable(data) {
+  tbody.innerHTML = '';
+
+  data.forEach(item => {
+
+    const low = item.qty <= 5;
+
+    const row = `
+      <tr>
+        <td>${item.category}</td>
+        <td>${item.name}</td>
+        <td>${item.qty}</td>
+        <td>${item.unit}</td>
+        <td>${convertUnit(item)}</td>
+        <td>
+          ${low
+            ? '<span class="low-stock">สต็อกต่ำ</span>'
+            : '<span class="good-stock">ปกติ</span>'}
+        </td>
+      </tr>
+    `;
+
+    tbody.innerHTML += row;
+  });
+
+  document.getElementById('totalProducts').innerText = data.length;
+  document.getElementById('lowStockCount').innerText = data.filter(i => i.qty <= 5).length;
+}
+
+function populateCategories() {
+  const categories = [...new Set(inventory.map(i => i.category))];
+
+  categories.forEach(cat => {
+    const option = document.createElement('option');
+    option.value = cat;
+    option.textContent = cat;
+    categoryFilter.appendChild(option);
+  });
+}
+
+function filterData() {
+  const cat = categoryFilter.value;
+  const keyword = searchInput.value.toLowerCase();
+
+  let filtered = inventory.filter(item => {
+    const matchCategory = cat === 'all' || item.category === cat;
+    const matchSearch = item.name.toLowerCase().includes(keyword);
+
+    return matchCategory && matchSearch;
+  });
+
+  renderTable(filtered);
+}
+
+function showLowStock() {
+  const lowStock = inventory.filter(item => item.qty <= 5);
+  renderTable(lowStock);
+  alert('แสดงรายการสินค้าใกล้หมดแล้ว');
+}
+
+function exportExcel() {
+  const worksheet = XLSX.utils.json_to_sheet(inventory);
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Inventory');
+  XLSX.writeFile(workbook, 'NTK_POPOPO_STOCK.xlsx');
+}
+
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+  doc.text('NTK Popopo Inventory Report', 10, 15);
+
+  let y = 30;
+
+  inventory.forEach(item => {
+    doc.setFontSize(10);
+    doc.text(`${item.category} | ${item.name} | ${item.qty} ${item.unit}`, 10, y);
+    y += 8;
+
+    if(y > 280) {
+      doc.addPage();
+      y = 20;
+    }
+  });
+
+  doc.save('NTK_POPOPO_REPORT.pdf');
+}
+
+function renderSummary() {
+
+  const summary = {};
+
+  inventory.forEach(item => {
+    if(!summary[item.category]) {
+      summary[item.category] = 0;
+    }
+
+    summary[item.category] += item.qty;
+  });
+
+  summaryGrid.innerHTML = '';
+
+  for(const cat in summary) {
+    summaryGrid.innerHTML += `
+      <div class="summary-item">
+        <h4>${cat}</h4>
+        <p>จำนวนรวม ${summary[cat]} รายการ</p>
+      </div>
+    `;
+  }
+}
+
+categoryFilter.addEventListener('change', filterData);
+searchInput.addEventListener('keyup', filterData);
+
+populateCategories();
+renderTable(inventory);
+renderSummary();
+
+async function fetchRealtimeStock() {
+  try {
+    if (!GOOGLE_SHEET_WEBAPP_URL || GOOGLE_SHEET_WEBAPP_URL.includes('วางลิงก์')) {
+      return;
+    }
+
+    const response = await fetch(GOOGLE_SHEET_WEBAPP_URL);
+    const data = await response.json();
+
+    inventory = data;
+
+    filterData();
+    renderSummary();
+
+    const lowStockItems = inventory.filter(i => i.qty <= 3);
+
+    if (lowStockItems.length > 0) {
+      console.log('แจ้งเตือน: มีสินค้าใกล้หมด');
+    }
+
+  } catch (error) {
+    console.error('โหลดข้อมูล Real-time ไม่สำเร็จ', error);
+  }
+}
+
+fetchRealtimeStock();
+setInterval(fetchRealtimeStock, SHEET_POLL_MS);
+
+</script>
+
+</body>
+</html>
+```
